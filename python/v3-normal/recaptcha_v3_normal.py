@@ -1,0 +1,150 @@
+"""
+Resolvedor de reCaptcha V3 usando la API de CapSolver
+Resuelve desafíos de reCaptcha V3 con pageAction
+"""
+
+import capsolver
+import os
+import time
+
+# Parámetros de reCaptcha V3
+SITE_KEY = "6LdKlZEpAAAAAAOQjzC2v_d36tWxCl6dWsozdSy9"
+PAGE_URL = "https://recaptcha-demo.appspot.com/recaptcha-v3-request-scores.php"
+PAGE_ACTION = "examples/v3scores"
+
+
+def resolver_recaptcha_v3(site_key, page_url, page_action):
+    """
+    Resolver reCaptcha V3 usando la API de CapSolver
+    
+    Args:
+        site_key (str): La clave del sitio de reCaptcha
+        page_url (str): La URL donde se encuentra el reCaptcha
+        page_action (str): La acción de la página
+    
+    Returns:
+        str: El token g-recaptcha-response
+    """
+    print(f"[*] Iniciando resolución de reCaptcha V3...")
+    print(f"[*] Site Key: {site_key}")
+    print(f"[*] URL de Página: {page_url}")
+    print(f"[*] Page Action: {page_action}")
+    
+    try:
+        # Configurar la clave API de CapSolver desde variable de entorno
+        capsolver.api_key = os.getenv("CAPSOLVER_API_KEY")
+        
+        if not capsolver.api_key:
+            raise ValueError("La variable de entorno CAPSOLVER_API_KEY no está configurada")
+        
+        print("[*] Enviando tarea a CapSolver...")
+        
+        # Construir payload de la tarea
+        tarea_payload = {
+            "type": "ReCaptchaV3TaskProxyLess",
+            "websiteKey": site_key,
+            "websiteURL": page_url,
+            "pageAction": page_action
+        }
+        
+        # Resolver el reCaptcha
+        solucion = capsolver.solve(tarea_payload)
+        
+        print("[+] ¡Captcha resuelto exitosamente!")
+        
+        # Extraer el token g-recaptcha-response
+        g_recaptcha_response = solucion.get("gRecaptchaResponse")
+        
+        if g_recaptcha_response:
+            print(f"[+] Token recibido (longitud: {len(g_recaptcha_response)} caracteres)")
+            return g_recaptcha_response
+        else:
+            raise Exception("No se encontró gRecaptchaResponse en la solución")
+            
+    except Exception as e:
+        print(f"[-] Error al resolver reCaptcha: {e}")
+        raise
+
+
+def enviar_solucion(g_recaptcha_response):
+    """
+    Función de ejemplo que muestra cómo enviar el token al sitio objetivo
+    
+    Args:
+        g_recaptcha_response (str): El token del captcha resuelto
+    """
+    import requests
+    
+    print("\n[*] Enviando solución al sitio de demostración...")
+    
+    try:
+        # Enviar el token al sitio de demostración
+        respuesta = requests.post(
+            PAGE_URL,
+            data={
+                "g-recaptcha-response": g_recaptcha_response,
+                "action": PAGE_ACTION
+            },
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+        )
+        
+        if respuesta.status_code == 200:
+            print("[+] ¡Solución enviada exitosamente!")
+            print(f"[+] Estado de respuesta: {respuesta.status_code}")
+            
+            # Verificar si el envío fue exitoso
+            if "success" in respuesta.text.lower() or "score" in respuesta.text.lower():
+                print("[+] ✓ ¡Verificación de reCaptcha exitosa!")
+                # Intentar extraer el score si está presente
+                if "score" in respuesta.text.lower():
+                    print("[*] Respuesta contiene información de score")
+            else:
+                print("[*] Respuesta recibida, verifica manualmente")
+                
+            return True
+        else:
+            print(f"[-] El envío falló con estado: {respuesta.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"[-] Error al enviar la solución: {e}")
+        return False
+
+
+def main():
+    """
+    Función principal de ejecución
+    """
+    print("=" * 70)
+    print("Resolvedor de reCaptcha V3 - Integración con CapSolver")
+    print("=" * 70)
+    
+    try:
+        # Paso 1: Resolver el reCaptcha
+        token = resolver_recaptcha_v3(SITE_KEY, PAGE_URL, PAGE_ACTION)
+        
+        print("\n" + "=" * 70)
+        print("RESULTADO DEL TOKEN")
+        print("=" * 70)
+        print(f"\ng-recaptcha-response:\n{token}\n")
+        
+        # Paso 2: Enviar la solución (demostración opcional)
+        entrada_usuario = input("\n¿Deseas enviar este token al sitio de demostración? (s/n): ")
+        if entrada_usuario.lower() == 's':
+            enviar_solucion(token)
+        else:
+            print("[*] Token listo para usar. Omitiendo envío.")
+        
+        print("\n[+] ¡Proceso completado exitosamente!")
+        
+    except Exception as e:
+        print(f"\n[-] El proceso falló: {e}")
+        return 1
+    
+    return 0
+
+
+if __name__ == "__main__":
+    exit(main())
