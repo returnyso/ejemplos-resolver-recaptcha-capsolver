@@ -1,0 +1,13 @@
+{
+  "name": "recaptcha-v2-enterprise-invisible-session",
+  "version": "1.0.0",
+  "description": "Resolver de reCaptcha V2 Enterprise Invisible con Session usando CapSolver",
+  "main": "recaptcha_v2_enterprise_invisible_session.js",
+  "scripts": {
+    "start": "node recaptcha_v2_enterprise_invisible_session.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  }
+}

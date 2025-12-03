@@ -1,0 +1,13 @@
+{
+  "name": "recaptcha-v2-pageaction",
+  "version": "1.0.0",
+  "description": "Resolver de reCaptcha V2 con pageAction usando CapSolver",
+  "main": "recaptcha_v2_pageaction.js",
+  "scripts": {
+    "start": "node recaptcha_v2_pageaction.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  }
+}

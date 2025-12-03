@@ -1,0 +1,13 @@
+{
+  "name": "recaptcha-v3-normal",
+  "version": "1.0.0",
+  "description": "Resolver de reCaptcha V3 usando CapSolver",
+  "main": "recaptcha_v3_normal.js",
+  "scripts": {
+    "start": "node recaptcha_v3_normal.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  }
+}
